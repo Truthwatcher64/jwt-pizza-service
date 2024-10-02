@@ -29,6 +29,10 @@ beforeEach(async () => {
 
 });
 
+function createFranchise(){
+
+}
+
 test('list franchise', async () => {
     let listRes = await request(app).get('/api/franchise');
 
@@ -95,4 +99,39 @@ test('adding a store test', async () => {
 
 });
 
+test('delete a franchise', async () => {
+    //example: `curl -X DELETE localhost:3000/api/franchise/1 -H 'Authorization: Bearer tttttt'`,
+    let houseName = randomName();
+    let reqBody = {"name": houseName, "admins": [{"email": adminUser.email}]}
+    const addRes = await request(app).post('/api/franchise').set("Authorization", `Bearer ${adminAuthToken}`).send(reqBody);
+    
+    let id = addRes.body.id;
+    let path = `/api/franchise/${id}`;
+    let franchiseName = randomName();
 
+    let deleteRes = await request(app).delete(path).set("Authorization", `Bearer ${adminAuthToken}`);
+    expect(deleteRes.status).toBe(200);
+    expect(deleteRes.body.message).toBe('franchise deleted');
+});
+
+test('delete a store', async () => {
+    //example: `curl -X DELETE localhost:3000/api/franchise/1 -H 'Authorization: Bearer tttttt'`,
+    let houseName = randomName();
+    let reqBody = {"name": houseName, "admins": [{"email": adminUser.email}]}
+    const addRes = await request(app).post('/api/franchise').set("Authorization", `Bearer ${adminAuthToken}`).send(reqBody);
+    
+    let id = addRes.body.id;
+    let path = `/api/franchise/${id}`;
+    let franchiseName = randomName();
+
+    let storeName = randomName();
+    reqBody = {"franchiseId": id, "name":storeName};
+    const addStoreRes = await request(app).post(path).set("Authorization", `Bearer ${adminAuthToken}`).send(reqBody);
+
+    let storeId = addStoreRes.body.id;
+    let StorePath = `/api/franchise/${id}/store/${storeId}`;
+
+    let deleteRes = await request(app).delete(StorePath).set("Authorization", `Bearer ${adminAuthToken}`);
+    expect(deleteRes.status).toBe(200);
+    expect(deleteRes.body.message).toBe('store deleted');
+});
