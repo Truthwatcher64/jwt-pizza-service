@@ -58,13 +58,11 @@ test('add item weird case', async () => {
 });
 
 test('add item admin', async () => {
-    //console.log((adminAuthToken));
     let tempTitle = randomName();
     let reqBody =  {"title":tempTitle, "description": "Cheesy Cheesey", "image":"pizza9.png", "price": 0.0001 }
     const menuAdd = await request(app).put('/api/order/menu').send(reqBody).set('Authorization', `Bearer ${adminAuthToken}`);
 
     expect(menuAdd.status).toBe(200);
-    // ? expect(menuAdd.message).toBe('unable to add menu item');
 });
 
 let franchiseName;
