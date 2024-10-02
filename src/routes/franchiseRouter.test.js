@@ -20,31 +20,25 @@ async function createAdminUser() {
 }
 
 beforeEach(async () => {
-  //testUser.name = randomName();
-  //testUser.email = Math.random().toString(36).substring(2, 12) + '@test.com';
-  //const registerRes = await request(app).put('/api/auth').send(testUser);
-  //testUserAuthToken = registerRes.body.token;
+
   adminUser = await createAdminUser();
-  //console.log(adminUser);
-  //console.log(adminUser.email);
-  //console.log(adminUser.password);
+
   const adminRes = await request(app).put('/api/auth').send({"email": adminUser.email, "password": adminUser.password});
-  console.log(adminRes.body);
+
   adminAuthToken = adminRes.body.token;
-  console.log(adminAuthToken);
+
 });
 
 test('list franchise', async () => {
     let listRes = await request(app).get('/api/franchise');
 
+    
     expect(listRes.status).toBe(200);
-    console.log(listRes.body);
-    //expect(listRes.body).toBe('[]');
+    expect(listRes.headers['content-type']).toMatch('application/json; charset=utf-8');
 
-    console.log(adminAuthToken);
-    console.log(adminUser.email);
+
+
     let houseName = randomName();
-    //curl -X POST localhost:3000/api/franchise -H 'Content-Type: application/json' -H 'Authorization: Bearer tttttt' -d '{"name": "pizzaPocket", "admins": [{"email": "f@jwt.com"}]}'
     let temp = {"name": `${houseName}`, "admins": [{"email": `${adminUser.email}`}]}
     const addRes = await request(app).post('/api/franchise').send(temp).set("Authorization", `Bearer ${adminAuthToken}`);
     expect(addRes.status).toBe(200);
@@ -52,21 +46,53 @@ test('list franchise', async () => {
 
     listRes = await request(app).get('/api/franchise');
     expect(listRes.status).toBe(200);
+    expect(listRes.body.size).not.toBe(0);
 });
 
 
-// test('adding test', async () => {
-//     let houseName = randomName();
-//     const addRes = await request(app).post('/api/franchise').set("Authorization", `Bearer ${adminAuthToken}`).send(`{"name": "${houseName}", "admins": [{"email": "${adminUser.email}"}]}`);
-//     expect(addRes.status).toBe(200);
-//     expect(addRes.body.name).toBe(houseName);
-// });
+test('adding test', async () => {
+    let houseName = randomName();
+    let reqBody = {"name": houseName, "admins": [{"email": adminUser.email}]}
+    const addRes = await request(app).post('/api/franchise').set("Authorization", `Bearer ${adminAuthToken}`).send(reqBody);
+    expect(addRes.status).toBe(200);
+    expect(addRes.body.name).toBe(houseName);
+});
 
-// test('getting another users franchise', async () => {
-//     let bigGuy = createAdminUser();
-//     let bigGuyAuth = await request(app).put('/api/auth');
-//     let otherFranchisesRes = await request(app).post('/api/franchise/1').set("Authorization", `Bearer ${adminAuthToken}`);
-//     expect(otherFranchisesRes.status).toBe(200);
+test('getting another users franchise', async () => {
+    let bigGuy = await createAdminUser();
+    const adminRes = await request(app).put('/api/auth').send({"email": bigGuy.email, "password": bigGuy.password});
+
+    let bigGuyAuth = adminRes.body.token;
+    let bigGuyId = adminRes.body.user.id;
+
+    let houseName = randomName();
+    let temp = {"name": `${houseName}`, "admins": [{"email": `${bigGuy.email}`}]}
+    const addRes = await request(app).post('/api/franchise').send(temp).set("Authorization", `Bearer ${bigGuyAuth}`);
+
+    let path = `/api/franchise/${bigGuyId}`;
+    let otherFranchisesRes = await request(app).get(path).set("Authorization", `Bearer ${adminAuthToken}`);
+    expect(otherFranchisesRes.status).toBe(200);
     
-// });
+    
+});
+
+
+test('adding a store test', async () => {
+    let houseName = randomName();
+    let reqBody = {"name": houseName, "admins": [{"email": adminUser.email}]}
+    const addRes = await request(app).post('/api/franchise').set("Authorization", `Bearer ${adminAuthToken}`).send(reqBody);
+    
+    let id = addRes.body.id;
+    let path = `/api/franchise/${id}/store`;
+    let storeName = randomName();
+
+    reqBody = {"franchiseId": id, "name":storeName};
+    const addStoreRes = await request(app).post(path).set("Authorization", `Bearer ${adminAuthToken}`).send(reqBody);
+    expect(addStoreRes.status).toBe(200);
+    
+    expect(addStoreRes.body.name).toBe(storeName);
+    expect(addStoreRes.body.franchiseId).toBe(id);
+
+});
+
 
