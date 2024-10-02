@@ -19,7 +19,7 @@ async function createAdminUser() {
   return user;
 }
 
-beforeEach(async () => {
+beforeAll(async () => {
 
   adminUser = await createAdminUser();
 
