@@ -2,6 +2,7 @@ const express = require('express');
 const config = require('./config.js');
 
 const os = require('os');
+const { secureHeapUsed } = require('crypto');
 
 class Metrics {
     constructor() {
@@ -40,8 +41,8 @@ function sendMetricsPeriodically() {
         httpMetrics();
         systemMetrics();
         // userMetrics();
-        // purchaseMetrics();
-        // authMetrics();
+        purchaseMetrics();
+        authMetrics();
 
     } catch (error) {
         console.log('Error sending metrics', error);
@@ -55,11 +56,6 @@ function systemMetrics() {
 
 function sendMetricToGrafana(metricPrefix, metricName, metricValue) {
     const metric = `${metricPrefix},source=${config.metrics.source} ${metricName}=${metricValue}`;
-    // console.log(metric);
-    // console.log(config.metrics.url);
-    // console.log(config.metrics.apiKey);
-    // console.log(config.metrics.userId);
-
     fetch(`${config.metrics.url}`, {
         method: 'post',
         body: metric,
@@ -112,27 +108,73 @@ function httpMetrics() {
 
 }
 
-// function authMetrics(buf) {
+function authMetrics() {
+    sendMetricToGrafana('auth', 'successful', successAuth);
+    sendMetricToGrafana('auth', 'failure', failAuth);
+    successAuth = 0;
+    failAuth = 0;
+}
 
-// }
-
-// function addSuccessAuth() {
-//     successAuth++;
-// }
-// function addFailAuth() {
-//     failAuth++;
-// }
-
-// processAllRequests(req) {
-//     if (req.t)
-// }
+function addSuccessAuth() {
+    successAuth++;
+}
+function addFailAuth() {
+    failAuth++;
+}
 
 
 //Pizzas
+function purchaseMetrics() {
+    sendMetricToGrafana('sales', 'total', pizzaMade);
+    sendMetricToGrafana('sales', 'failures', pizzaFailures);
+    sendMetricToGrafana('sales', 'moneyEarned', sectionTotal);
+    sendMetricToGrafana('latency', 'service', serviceLatency);
+    sendMetricToGrafana('latency', 'pizzaFactory', pizzaTime);
+    pizzaMade = 0;
+    pizzaFailures = 0;
+    sectionTotal = 0;
+    serviceLatency = 0;
+    pizzaTime = 0;
+}
+
+pizzaMade = 0;
+function orderMadeRecord() {
+    pizzaMade++;
+}
+
+pizzaFailures = 0;
+function pizzaMakesFailed() {
+    pizzaFailures++;
+}
+
+sectionTotal = 0;
+function moneyMade(moreMoney) {
+    sectionTotal = sectionTotal + moreMoney;
+}
 
 //Latency
+serviceLatency = 0;
+function backEndLatency(time) {
+    if (serviceLatency == 0) {
+        serviceLatency = time;
+    }
+    else {
+        serviceLatency = (serviceLatency + time) / 2;
+    }
+
+}
+
+pizzaTime = 0;
+function pizzaCreationTime(time) {
+    if (pizzaTime == 0) {
+        pizzaTime = time;
+    }
+    else {
+        pizzaTime = (pizzaTime + time) / 2;
+    }
+}
 
 
 
 const metrics = new Metrics();
-module.exports = { metrics, addRequest }
+module.exports = { metrics, addRequest, addFailAuth, addSuccessAuth, orderMadeRecord, pizzaMakesFailed, moneyMade, backEndLatency, pizzaCreationTime }
