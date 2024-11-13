@@ -7,7 +7,6 @@ const config = require('./config.js');
 const { metrics, addRequest } = require('./metrics.js');
 
 const app = express();
-//app.use(addRequest);
 app.use(express.json());
 app.use(setAuthUser);
 app.use((req, res, next) => {
@@ -19,8 +18,8 @@ app.use((req, res, next) => {
 });
 
 const apiRouter = express.Router();
-app.use((req, res, next) => {
-  metrics.processAllRequests(req);
+app.use((req, next) => {
+  addRequest(req);
   next();
 });
 app.use('/api', apiRouter);
@@ -29,7 +28,6 @@ apiRouter.use('/order', orderRouter);
 apiRouter.use('/franchise', franchiseRouter);
 
 apiRouter.use('/docs', (req, res) => {
-  //addRequest();
   res.json({
     version: version.version,
     endpoints: [...authRouter.endpoints, ...orderRouter.endpoints, ...franchiseRouter.endpoints],
