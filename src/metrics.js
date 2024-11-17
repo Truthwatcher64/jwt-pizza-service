@@ -13,6 +13,7 @@ class Metrics {
         this.successAuth = 0;
         this.failAuth = 0;
         this.totalRequests = 0;
+        this.currentUsers = 0;
 
         // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {
@@ -26,13 +27,17 @@ class Metrics {
         try {
             this.httpMetrics();
             this.systemMetrics();
-            // // userMetrics();
+            this.userMetrics();
             // purchaseMetrics();
             this.authMetrics();
 
         } catch (error) {
             console.log('Error sending metrics', error);
         }
+    }
+
+    userMetrics() {
+        this.sendMetricToGrafana('users', 'currentCount', this.currentUsers);
     }
 
     httpMetrics() {
@@ -109,9 +114,7 @@ class Metrics {
     }
 
     authMetrics() {
-        console.log("sending auth data");
-        console.log(this.successAuth);
-        console.log(this.failAuth);
+        console.log(this.failAuth)
         this.sendMetricToGrafana('auth', 'successful', this.successAuth);
         this.sendMetricToGrafana('auth', 'failure', this.failAuth);
         this.successAuth = 0;
@@ -119,12 +122,15 @@ class Metrics {
     }
 
     addSuccessAuth() {
-        console.log("authentication");
         this.successAuth++;
+        this.currentUsers++;
     }
     addFailAuth() {
-        console.log("authentication");
         this.failAuth++;
+    }
+
+    userLeft() {
+        this.currentUsers--;
     }
 
     //Pizzas

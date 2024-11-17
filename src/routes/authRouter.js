@@ -88,8 +88,9 @@ authRouter.put(
       const auth = await setAuth(user);
     }
     catch {
+      //console.log("Failed an auth");
       metrics.addFailAuth();
-      throw new StatusCodeError('unknown user', 404); // Throw an error to be caught by asyncHandler
+      throw new StatusCodeError('unknown user', 404); // repeat error
     }
     metrics.addSuccessAuth();
     res.json({ user: user, token: auth });
@@ -102,6 +103,7 @@ authRouter.delete(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     clearAuth(req);
+    metrics.userLeft();
     res.json({ message: 'logout successful' });
   })
 );
