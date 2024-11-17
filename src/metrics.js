@@ -17,7 +17,7 @@ class Metrics {
         // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {
             this.sendMetricsPeriodically();
-        }, 10000);
+        }, 5000);
         timer.unref();
     }
 
@@ -28,7 +28,7 @@ class Metrics {
             this.systemMetrics();
             // // userMetrics();
             // purchaseMetrics();
-            // authMetrics();
+            this.authMetrics();
 
         } catch (error) {
             console.log('Error sending metrics', error);
@@ -109,28 +109,31 @@ class Metrics {
     }
 
     authMetrics() {
-        this.sendMetricToGrafana('auth', 'successful', successAuth);
-        this.sendMetricToGrafana('auth', 'failure', failAuth);
+        console.log("sending auth data");
+        console.log(this.successAuth);
+        console.log(this.failAuth);
+        this.sendMetricToGrafana('auth', 'successful', this.successAuth);
+        this.sendMetricToGrafana('auth', 'failure', this.failAuth);
         this.successAuth = 0;
         this.failAuth = 0;
     }
 
     addSuccessAuth() {
-        this.console.log("authentication");
+        console.log("authentication");
         this.successAuth++;
     }
     addFailAuth() {
-        this.console.log("authentication");
+        console.log("authentication");
         this.failAuth++;
     }
 
     //Pizzas
     purchaseMetrics() {
-        this.sendMetricToGrafana('sales', 'total', pizzaMade);
-        this.sendMetricToGrafana('sales', 'failures', pizzaFailures);
-        this.sendMetricToGrafana('sales', 'moneyEarned', sectionTotal);
-        this.sendMetricToGrafana('latency', 'service', serviceLatency);
-        this.sendMetricToGrafana('latency', 'pizzaFactory', pizzaTime);
+        this.sendMetricToGrafana('sales', 'total', this.pizzaMade);
+        this.sendMetricToGrafana('sales', 'failures', this.pizzaFailures);
+        this.sendMetricToGrafana('sales', 'moneyEarned', this.sectionTotal);
+        this.sendMetricToGrafana('latency', 'service', this.serviceLatency);
+        this.sendMetricToGrafana('latency', 'pizzaFactory', this.pizzaTime);
         this.pizzaMade = 0;
         this.pizzaFailures = 0;
         this.sectionTotal = 0;
