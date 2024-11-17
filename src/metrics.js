@@ -2,7 +2,16 @@ const config = require('./config.js');
 const os = require('os');
 
 class Metrics {
+
+
     constructor() {
+        this.totalHttp = 0;
+        this.getHttp = 0;
+        this.postHttp = 0;
+        this.putHttp = 0;
+        this.deleteHttp = 0;
+        this.successAuth = 0;
+        this.failAuth = 0;
         this.totalRequests = 0;
 
         // This will periodically sent metrics to Grafana
@@ -28,16 +37,21 @@ class Metrics {
 
     httpMetrics() {
         //add each type of metric
-        this.sendMetricToGrafana('requests', 'getHttp', getHttp);
-        this.sendMetricToGrafana('requests', 'deleteHttp', deleteHttp);
-        this.sendMetricToGrafana('requests', 'totalHttp', totalHttp);
-        this.sendMetricToGrafana('requests', 'putHttp', putHttp);
-        this.sendMetricToGrafana('requests', 'postHttp', postHttp);
-        totalHttp = 0;
-        getHttp = 0;
-        deleteHttp = 0;
-        putHttp = 0;
-        postHttp = 0;
+        this.sendMetricToGrafana('requests', 'getHttp', this.getHttp);
+        this.sendMetricToGrafana('requests', 'deleteHttp', this.deleteHttp);
+        this.sendMetricToGrafana('requests', 'totalHttp', this.totalHttp);
+        this.sendMetricToGrafana('requests', 'putHttp', this.putHttp);
+        this.sendMetricToGrafana('requests', 'postHttp', this.postHttp);
+        this.totalHttp = 0;
+        this.getHttp = 0;
+        this.deleteHttp = 0;
+        this.putHttp = 0;
+        this.postHttp = 0;
+        this.pizzaMade = 0;
+        this.sectionTotal = 0;
+        this.pizzaFailures = 0;
+        this.serviceLatency = 0;
+        this.pizzaTime = 0;
     }
 
     systemMetrics() {
@@ -58,29 +72,20 @@ class Metrics {
         return memoryUsage.toFixed(2);
     }
 
-
-    totalHttp = 0;
-    getHttp = 0;
-    postHttp = 0;
-    putHttp = 0;
-    deleteHttp = 0;
-    successAuth = 0;
-    failAuth = 0;
-
     //total requests
     addRequest(req) {
-        totalHttp++;
+        this.totalHttp++;
         if (req.method == "GET") {
-            getHttp++;
+            this.getHttp++;
         }
         else if (req.method == "POST") {
-            postHttp++;
+            this.postHttp++;
         }
         else if (req.method == "PUT") {
-            putHttp++;
+            this.putHttp++;
         }
         else if (req.method == "DELETE") {
-            deleteHttp++;
+            this.deleteHttp++;
         }
     }
 
@@ -106,15 +111,63 @@ class Metrics {
     authMetrics() {
         this.sendMetricToGrafana('auth', 'successful', successAuth);
         this.sendMetricToGrafana('auth', 'failure', failAuth);
-        successAuth = 0;
-        failAuth = 0;
+        this.successAuth = 0;
+        this.failAuth = 0;
     }
 
     addSuccessAuth() {
-        successAuth++;
+        this.console.log("authentication");
+        this.successAuth++;
     }
     addFailAuth() {
-        failAuth++;
+        this.console.log("authentication");
+        this.failAuth++;
+    }
+
+    //Pizzas
+    purchaseMetrics() {
+        this.sendMetricToGrafana('sales', 'total', pizzaMade);
+        this.sendMetricToGrafana('sales', 'failures', pizzaFailures);
+        this.sendMetricToGrafana('sales', 'moneyEarned', sectionTotal);
+        this.sendMetricToGrafana('latency', 'service', serviceLatency);
+        this.sendMetricToGrafana('latency', 'pizzaFactory', pizzaTime);
+        this.pizzaMade = 0;
+        this.pizzaFailures = 0;
+        this.sectionTotal = 0;
+        this.serviceLatency = 0;
+        this.pizzaTime = 0;
+    }
+
+    orderMadeRecord() {
+        this.pizzaMade++;
+    }
+
+    pizzaMakesFailed() {
+        this.pizzaFailures++;
+    }
+
+    moneyMade(moreMoney) {
+        this.sectionTotal = this.sectionTotal + moreMoney;
+    }
+
+    //Latency
+    backEndLatency(time) {
+        if (this.serviceLatency == 0) {
+            this.serviceLatency = time;
+        }
+        else {
+            this.serviceLatency = (this.serviceLatency + time) / 2;
+        }
+
+    }
+
+    pizzaCreationTime(time) {
+        if (this.pizzaTime == 0) {
+            this.pizzaTime = time;
+        }
+        else {
+            this.pizzaTime = (this.pizzaTime + time) / 2;
+        }
     }
 }
 

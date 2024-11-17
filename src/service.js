@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 const apiRouter = express.Router();
 app.use((req, res, next) => {
   metrics.addRequest(req);
-  console.log("Log a request");
+  //console.log("Log a request");
   next();
 });
 console.log("Back to main flow");
