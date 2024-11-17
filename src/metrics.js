@@ -1,180 +1,122 @@
-const express = require('express');
 const config = require('./config.js');
-
 const os = require('os');
-const { secureHeapUsed } = require('crypto');
 
 class Metrics {
     constructor() {
+        this.totalRequests = 0;
+
         // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {
-            sendMetricsPeriodically();
+            this.sendMetricsPeriodically();
         }, 10000);
         timer.unref();
     }
-}
 
-totalHttp = 0;
-getHttp = 0;
-postHttp = 0;
-putHttp = 0;
-deleteHttp = 0;
-successAuth = 0;
-failAuth = 0;
+    sendMetricsPeriodically() {
 
-function getCpuUsagePercentage() {
-    const cpuUsage = os.loadavg()[0] / os.cpus().length;
-    return cpuUsage.toFixed(2) * 100;
-}
+        try {
+            this.httpMetrics();
+            this.systemMetrics();
+            // // userMetrics();
+            // purchaseMetrics();
+            // authMetrics();
 
-function getMemoryUsagePercentage() {
-    const totalMemory = os.totalmem();
-    const freeMemory = os.freemem();
-    const usedMemory = totalMemory - freeMemory;
-    const memoryUsage = (usedMemory / totalMemory) * 100;
-    return memoryUsage.toFixed(2);
-}
-
-function sendMetricsPeriodically() {
-
-    try {
-        httpMetrics();
-        systemMetrics();
-        // userMetrics();
-        purchaseMetrics();
-        authMetrics();
-
-    } catch (error) {
-        console.log('Error sending metrics', error);
+        } catch (error) {
+            console.log('Error sending metrics', error);
+        }
     }
-}
 
-function systemMetrics() {
-    sendMetricToGrafana('cpu', 'cpuPercentage', getCpuUsagePercentage());
-    sendMetricToGrafana('memory', 'memoryPercentage', getMemoryUsagePercentage());
-}
-
-function sendMetricToGrafana(metricPrefix, metricName, metricValue) {
-    const metric = `${metricPrefix},source=${config.metrics.source} ${metricName}=${metricValue}`;
-    fetch(`${config.metrics.url}`, {
-        method: 'post',
-        body: metric,
-        headers: { Authorization: `Bearer ${config.metrics.userId}:${config.metrics.apiKey}` },
-    })
-        .then((response) => {
-            if (!response.ok) {
-                console.error('Failed to push metrics data to Grafana');
-            } else {
-                console.log(`Pushed ${metric}`);
-            }
-        })
-        .catch((error) => {
-            console.error('Error pushing metrics:', error);
-        });
-}
-
-
-//total requests
-function addRequest(req) {
-    totalHttp++;
-    if (req.method == "GET") {
-
-        getHttp++;
+    httpMetrics() {
+        //add each type of metric
+        this.sendMetricToGrafana('requests', 'getHttp', getHttp);
+        this.sendMetricToGrafana('requests', 'deleteHttp', deleteHttp);
+        this.sendMetricToGrafana('requests', 'totalHttp', totalHttp);
+        this.sendMetricToGrafana('requests', 'putHttp', putHttp);
+        this.sendMetricToGrafana('requests', 'postHttp', postHttp);
+        totalHttp = 0;
+        getHttp = 0;
+        deleteHttp = 0;
+        putHttp = 0;
+        postHttp = 0;
     }
-    else if (req.method == "POST") {
-        postHttp++;
+
+    systemMetrics() {
+        this.sendMetricToGrafana('cpu', 'cpuPercentage', this.getCpuUsagePercentage());
+        this.sendMetricToGrafana('memory', 'memoryPercentage', this.getMemoryUsagePercentage());
     }
-    else if (req.method == "PUT") {
-        putHttp++;
+
+    getCpuUsagePercentage() {
+        const cpuUsage = os.loadavg()[0] / os.cpus().length;
+        return cpuUsage.toFixed(2) * 100;
     }
-    else if (req.method == "DELETE") {
-        deleteHttp++;
+
+    getMemoryUsagePercentage() {
+        const totalMemory = os.totalmem();
+        const freeMemory = os.freemem();
+        const usedMemory = totalMemory - freeMemory;
+        const memoryUsage = (usedMemory / totalMemory) * 100;
+        return memoryUsage.toFixed(2);
     }
-}
 
 
-function httpMetrics() {
-    //add each type of metric
-    sendMetricToGrafana('requests', 'getHttp', getHttp);
-    sendMetricToGrafana('requests', 'deleteHttp', deleteHttp);
-    sendMetricToGrafana('requests', 'totalHttp', totalHttp);
-    sendMetricToGrafana('requests', 'putHttp', putHttp);
-    sendMetricToGrafana('requests', 'postHttp', postHttp);
     totalHttp = 0;
     getHttp = 0;
-    deleteHttp = 0;
-    putHttp = 0;
     postHttp = 0;
-
-}
-
-function authMetrics() {
-    sendMetricToGrafana('auth', 'successful', successAuth);
-    sendMetricToGrafana('auth', 'failure', failAuth);
+    putHttp = 0;
+    deleteHttp = 0;
     successAuth = 0;
     failAuth = 0;
-}
 
-function addSuccessAuth() {
-    successAuth++;
-}
-function addFailAuth() {
-    failAuth++;
-}
-
-
-//Pizzas
-function purchaseMetrics() {
-    sendMetricToGrafana('sales', 'total', pizzaMade);
-    sendMetricToGrafana('sales', 'failures', pizzaFailures);
-    sendMetricToGrafana('sales', 'moneyEarned', sectionTotal);
-    sendMetricToGrafana('latency', 'service', serviceLatency);
-    sendMetricToGrafana('latency', 'pizzaFactory', pizzaTime);
-    pizzaMade = 0;
-    pizzaFailures = 0;
-    sectionTotal = 0;
-    serviceLatency = 0;
-    pizzaTime = 0;
-}
-
-pizzaMade = 0;
-function orderMadeRecord() {
-    pizzaMade++;
-}
-
-pizzaFailures = 0;
-function pizzaMakesFailed() {
-    pizzaFailures++;
-}
-
-sectionTotal = 0;
-function moneyMade(moreMoney) {
-    sectionTotal = sectionTotal + moreMoney;
-}
-
-//Latency
-serviceLatency = 0;
-function backEndLatency(time) {
-    if (serviceLatency == 0) {
-        serviceLatency = time;
-    }
-    else {
-        serviceLatency = (serviceLatency + time) / 2;
+    //total requests
+    addRequest(req) {
+        totalHttp++;
+        if (req.method == "GET") {
+            getHttp++;
+        }
+        else if (req.method == "POST") {
+            postHttp++;
+        }
+        else if (req.method == "PUT") {
+            putHttp++;
+        }
+        else if (req.method == "DELETE") {
+            deleteHttp++;
+        }
     }
 
-}
-
-pizzaTime = 0;
-function pizzaCreationTime(time) {
-    if (pizzaTime == 0) {
-        pizzaTime = time;
+    sendMetricToGrafana(metricPrefix, metricName, metricValue) {
+        const metric = `${metricPrefix},source=${config.metrics.source} ${metricName}=${metricValue}`;
+        fetch(`${config.metrics.url}`, {
+            method: 'post',
+            body: metric,
+            headers: { Authorization: `Bearer ${config.metrics.userId}:${config.metrics.apiKey}` },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    console.error('Failed to push metrics data to Grafana');
+                } else {
+                    //console.log(`Pushed ${metric}`);
+                }
+            })
+            .catch((error) => {
+                console.error('Error pushing metrics:', error);
+            });
     }
-    else {
-        pizzaTime = (pizzaTime + time) / 2;
+
+    authMetrics() {
+        this.sendMetricToGrafana('auth', 'successful', successAuth);
+        this.sendMetricToGrafana('auth', 'failure', failAuth);
+        successAuth = 0;
+        failAuth = 0;
+    }
+
+    addSuccessAuth() {
+        successAuth++;
+    }
+    addFailAuth() {
+        failAuth++;
     }
 }
-
-
 
 const metrics = new Metrics();
-module.exports = { metrics, addRequest, addFailAuth, addSuccessAuth, orderMadeRecord, pizzaMakesFailed, moneyMade, backEndLatency, pizzaCreationTime }
+module.exports = metrics;

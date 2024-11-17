@@ -4,7 +4,7 @@ const orderRouter = require('./routes/orderRouter.js');
 const franchiseRouter = require('./routes/franchiseRouter.js');
 const version = require('./version.json');
 const config = require('./config.js');
-const { metrics, addRequest } = require('./metrics.js');
+const metrics = require('./metrics.js');
 
 const app = express();
 app.use(express.json());
@@ -18,10 +18,13 @@ app.use((req, res, next) => {
 });
 
 const apiRouter = express.Router();
-app.use((req, next) => {
-  addRequest(req);
+app.use((req, res, next) => {
+  metrics.addRequest(req);
+  console.log("Log a request");
   next();
 });
+console.log("Back to main flow");
+
 app.use('/api', apiRouter);
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/order', orderRouter);
