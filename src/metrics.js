@@ -28,7 +28,7 @@ class Metrics {
             this.httpMetrics();
             this.systemMetrics();
             this.userMetrics();
-            // purchaseMetrics();
+            this.purchaseMetrics();
             this.authMetrics();
 
         } catch (error) {
@@ -114,7 +114,7 @@ class Metrics {
     }
 
     authMetrics() {
-        console.log(this.failAuth)
+        //console.log(this.failAuth)
         this.sendMetricToGrafana('auth', 'successful', this.successAuth);
         this.sendMetricToGrafana('auth', 'failure', this.failAuth);
         this.successAuth = 0;
@@ -133,9 +133,11 @@ class Metrics {
         this.currentUsers--;
     }
 
+
     //Pizzas
     purchaseMetrics() {
-        this.sendMetricToGrafana('sales', 'total', this.pizzaMade);
+        this.sendMetricToGrafana('sales', 'totalPizza', this.totalPizzas);
+        this.sendMetricToGrafana('sales', 'sectionPizza', this.pizzaMade);
         this.sendMetricToGrafana('sales', 'failures', this.pizzaFailures);
         this.sendMetricToGrafana('sales', 'moneyEarned', this.sectionTotal);
         this.sendMetricToGrafana('latency', 'service', this.serviceLatency);
@@ -149,6 +151,7 @@ class Metrics {
 
     orderMadeRecord() {
         this.pizzaMade++;
+        this.totalPizzas++;
     }
 
     pizzaMakesFailed() {
