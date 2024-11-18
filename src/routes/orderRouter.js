@@ -3,7 +3,7 @@ const config = require('../config.js');
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
-const { orderMadeRecord, pizzaMakesFailed, moneyMade, pizzaCreationTime } = require('../metrics.js');
+const metrics = require('../metrics.js');
 
 const orderRouter = express.Router();
 
@@ -89,9 +89,11 @@ orderRouter.post(
     const j = await r.json();
     if (r.ok) {
       const endTime = performance.now();
-      pizzaCreationTime(endTime - startTime);
+      metrics.pizzaCreationTime(endTime - startTime);
+      metrics.orderMadeRecord();
       res.send({ order, jwt: j.jwt, reportUrl: j.reportUrl });
     } else {
+      metrics.pizzaMakesFailed();
       res.status(500).send({ message: 'Failed to fulfill order at factory', reportUrl: j.reportUrl });
     }
   })

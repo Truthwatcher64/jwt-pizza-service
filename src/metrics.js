@@ -14,6 +14,7 @@ class Metrics {
         this.failAuth = 0;
         this.totalRequests = 0;
         this.currentUsers = 0;
+        this.totalPizzas = 0;
 
         // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {

@@ -86,14 +86,15 @@ authRouter.put(
     try {
       const user = await DB.getUser(email, password);
       const auth = await setAuth(user);
+      metrics.addSuccessAuth();
+      res.json({ user: user, token: auth });
     }
     catch {
       //console.log("Failed an auth");
       metrics.addFailAuth();
       throw new StatusCodeError('unknown user', 404); // repeat error
     }
-    metrics.addSuccessAuth();
-    res.json({ user: user, token: auth });
+
   })
 );
 
