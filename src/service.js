@@ -19,10 +19,10 @@ app.use((req, res, next) => {
 
 const apiRouter = express.Router();
 app.use((req, res, next) => {
+  serverTimer = performance.now();
   metrics.addRequest(req);
   next();
 });
-console.log("Back to main flow");
 
 app.use('/api', apiRouter);
 apiRouter.use('/auth', authRouter);
@@ -54,6 +54,12 @@ app.use('*', (req, res) => {
 // Default error handler for all exceptions and errors.
 app.use((err, req, res, next) => {
   res.status(err.statusCode ?? 500).json({ message: err.message, stack: err.stack });
+  next();
+});
+
+app.use((req, res, next) => {
+  endTimer = performance.now();
+  metrics.backEndLatency(endTimer - serverTimer);
   next();
 });
 

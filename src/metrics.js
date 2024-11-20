@@ -15,11 +15,16 @@ class Metrics {
         this.totalRequests = 0;
         this.currentUsers = 0;
         this.totalPizzas = 0;
+        this.pizzaTime = 0;
+        this.serviceLatency = 0;
+        this.sectionTotal = 0;
+        this.pizzaFailures = 0;
+        this.pizzaMade = 0;
 
         // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {
             this.sendMetricsPeriodically();
-        }, 5000);
+        }, 10000);
         timer.unref();
     }
 
@@ -53,11 +58,6 @@ class Metrics {
         this.deleteHttp = 0;
         this.putHttp = 0;
         this.postHttp = 0;
-        this.pizzaMade = 0;
-        this.sectionTotal = 0;
-        this.pizzaFailures = 0;
-        this.serviceLatency = 0;
-        this.pizzaTime = 0;
     }
 
     systemMetrics() {
@@ -133,7 +133,6 @@ class Metrics {
     userLeft() {
         this.currentUsers--;
     }
-
 
     //Pizzas
     purchaseMetrics() {
