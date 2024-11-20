@@ -17,9 +17,9 @@ app.use((req, res, next) => {
   next();
 });
 
+const serverTimer = performance.now();
 const apiRouter = express.Router();
 app.use((req, res, next) => {
-  serverTimer = performance.now();
   metrics.addRequest(req);
   next();
 });
@@ -58,7 +58,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  endTimer = performance.now();
+  const endTimer = performance.now();
   metrics.backEndLatency(endTimer - serverTimer);
   next();
 });
