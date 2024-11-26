@@ -105,6 +105,7 @@ class Metrics {
             .then((response) => {
                 if (!response.ok) {
                     console.error('Failed to push metrics data to Grafana');
+                    console.log(response);
                 } else {
                     //console.log(`Pushed ${metric}`);
                 }
@@ -115,7 +116,6 @@ class Metrics {
     }
 
     authMetrics() {
-        //console.log(this.failAuth)
         this.sendMetricToGrafana('auth', 'successful', this.successAuth);
         this.sendMetricToGrafana('auth', 'failure', this.failAuth);
         this.successAuth = 0;
