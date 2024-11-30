@@ -16,7 +16,31 @@ class Logger {
         }
     }
 
-    //dbLogger = ()
+    dbLogger = (sqlQuery, params) => {
+        let logData = {};
+        if (!params) {
+            logData = {
+                sqlQuery: sqlQuery
+            }
+        }
+        else {
+            logData = {
+                sqlQuery: sqlQuery,
+                sqlParams: params
+            }
+        }
+        logData = this.sanitize(logData);
+
+        this.log('info', 'dbQueries', logData);
+    }
+
+    exceptionsLogger = (ex) => {
+        const logData = {
+            exception: ex
+        }
+
+        this.log('error', 'exception', logData);
+    }
 
     httpLogger = (req, res, next) => {
         let send = res.send;

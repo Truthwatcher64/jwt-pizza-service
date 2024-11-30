@@ -93,7 +93,6 @@ orderRouter.post(
       metrics.pizzaCreationTime(endTime - startTime);
       metrics.orderMadeRecord();
       metrics.moneyMade(orderReq.items[0].price);
-      console.log("sending db");
       logger.pizzaFactoryLogger(JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }), { order, jwt: j.jwt, reportUrl: j.reportUrl }, endTime - startTime, false)
     }
     else {
