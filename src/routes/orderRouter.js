@@ -4,6 +4,7 @@ const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
 const metrics = require('../metrics.js');
+const logger = require('../logger.js');
 
 const orderRouter = express.Router();
 
@@ -88,14 +89,22 @@ orderRouter.post(
     });
     if (r.ok) {
       const endTime = performance.now();
+      const j = await r.json();
       metrics.pizzaCreationTime(endTime - startTime);
       metrics.orderMadeRecord();
       metrics.moneyMade(orderReq.items[0].price);
+      console.log("sending db");
+      logger.pizzaFactoryLogger(JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }), { order, jwt: j.jwt, reportUrl: j.reportUrl }, endTime - startTime, false)
     }
     else {
+      //const endTime = performance.now();
+      const j = await r.json();
+      //metrics.pizzaCreationTime(endTime - startTime);
       metrics.pizzaMakesFailed();
+      logger.pizzaFactoryLogger(JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }), { order, jwt: j.jwt, reportUrl: j.reportUrl }, endTime - startTime, true)
+
     }
-    const j = await r.json();
+
     if (r.ok) {
       res.send({ order, jwt: j.jwt, reportUrl: j.reportUrl });
     } else {

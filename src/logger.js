@@ -1,8 +1,24 @@
 const config = require('./config.js');
 
 class Logger {
+    pizzaFactoryLogger = (body, res, time, failed) => {
+        const logData = {
+            reqBody: JSON.stringify(body),
+            resBody: JSON.stringify(res),
+            time: time
+        }
+
+        if (failed) {
+            this.log('warn', 'pizzaFactory', logData);
+        }
+        else {
+            this.log('info', 'pizzaFactory', logData);
+        }
+    }
+
+    //dbLogger = ()
+
     httpLogger = (req, res, next) => {
-        console.log("Here");
         let send = res.send;
         res.send = (resBody) => {
             const logData = {
@@ -18,7 +34,6 @@ class Logger {
             res.send = send;
             return res.send(resBody);
         };
-        console.log(req.body);
         next();
     };
 
