@@ -25,17 +25,35 @@ class Metrics {
         const timer = setInterval(() => {
             this.sendMetricsPeriodically();
         }, 10000);
+        const timer2 = setInterval(() => {
+            this.sendMetricsPeriodically2();
+        }, 10000);
         timer.unref();
+        timer2.unref();
     }
 
     sendMetricsPeriodically() {
 
         try {
-            this.httpMetrics();
-            this.systemMetrics();
+            // this.httpMetrics();
+            // this.systemMetrics();
             this.userMetrics();
             this.purchaseMetrics();
             this.authMetrics();
+
+        } catch (error) {
+            console.log('Error sending metrics', error);
+        }
+    }
+
+    sendMetricsPeriodically2() {
+
+        try {
+            this.httpMetrics();
+            this.systemMetrics();
+            // this.userMetrics();
+            // this.purchaseMetrics();
+            // this.authMetrics();
 
         } catch (error) {
             console.log('Error sending metrics', error);

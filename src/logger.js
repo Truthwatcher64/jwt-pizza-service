@@ -5,7 +5,7 @@ class Logger {
         const logData = {
             reqBody: JSON.stringify(body),
             resBody: JSON.stringify(res),
-            time: time
+            time: parseInt(time)
         }
 
         if (failed) {
