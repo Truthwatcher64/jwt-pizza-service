@@ -54,6 +54,11 @@ jobs:
               },
               listPerPage: 10,
             },
+              adminUser: {
+              username: '${{ secrets.DEFAULT_ADMIN_NAME }}',
+              email: '${{ secrets.DEFAULT_ADMIN_EMAIL }}',
+              password: '${{ secrets.DEFAULT_ADMIN_PASSWORD }}'
+            },
             factory: {
               url: 'https://pizza-factory.cs329.click',
               apiKey: '${{ secrets.FACTORY_API_KEY }}',
