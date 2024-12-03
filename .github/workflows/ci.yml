@@ -54,7 +54,7 @@ jobs:
               },
               listPerPage: 10,
             },
-              adminUser: {
+            adminUser: {
               username: '${{ secrets.DEFAULT_ADMIN_NAME }}',
               email: '${{ secrets.DEFAULT_ADMIN_EMAIL }}',
               password: '${{ secrets.DEFAULT_ADMIN_PASSWORD }}'
