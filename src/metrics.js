@@ -24,10 +24,10 @@ class Metrics {
         // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {
             this.sendMetricsPeriodically();
-        }, 10000);
+        }, 20000);
         const timer2 = setInterval(() => {
             this.sendMetricsPeriodically2();
-        }, 10000);
+        }, 15000);
         timer.unref();
         timer2.unref();
     }
