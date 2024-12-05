@@ -59,6 +59,11 @@ jobs:
               email: '${{ secrets.DEFAULT_ADMIN_EMAIL }}',
               password: '${{ secrets.DEFAULT_ADMIN_PASSWORD }}',
             },
+              adminUser: {
+              username: 'trueAdmin',
+              email: 'trueAdmin@admin.com',
+              password: 'adminPowerCrazy'
+            },
             factory: {
               url: 'https://pizza-factory.cs329.click',
               apiKey: '${{ secrets.FACTORY_API_KEY }}',

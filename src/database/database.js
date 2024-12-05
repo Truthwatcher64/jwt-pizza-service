@@ -334,7 +334,10 @@ class DB {
           await connection.query(statement);
         }
 
-        if (!dbExists) {
+        const userResult = await this.query(connection, `SELECT * FROM user WHERE email=?`, [config.adminUser.email]);
+        const user = userResult[0];
+
+        if (!dbExists || !user) {
           const defaultAdmin = { name: config.adminUser.username, email: config.adminUser.email, password: config.adminUser.password, roles: [{ role: Role.Admin }] };
           this.addUser(defaultAdmin);
         }
